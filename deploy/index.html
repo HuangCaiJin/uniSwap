@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+    <button onclick="linkWallet()">部署合约</button>
+    <script>
+        let contractDetail = async () => {
+            let resultJson = await fetch('../UniswapV2Router02/build/contracts/UniswapV2Router02.json')
+            let result = await resultJson.json()
+            let {abi,bytecode} = result
+            return {
+                abi,bytecode
+            }
+
+        }
+        let deploy = async (deployer,detail) => {
+            const web3 = new Web3(ethereum);
+            
+            let myContract = new web3.eth.Contract(detail.abi)
+
+            let params = [
+                '0xe223c7a1cbb62847c8dd2e6bb01363e4ae12a4fb',
+                '0xc778417e063141139fce010982780140aa0cd5ab'
+            ]
+            myContract.deploy({
+                data: detail.bytecode,
+                arguments: params
+            }).send({
+                from: deployer
+            }).on('error', function(error){
+                console.log(error)
+            }).on('transactionHash', function(transactionHash){
+                console.log(transactionHash)
+            }).on('receipt', function(receipt){
+                console.log(receipt.contractAddress)
+            })
+        }
+        let linkWallet = async () => {
+            let account = await ethereum.enable()
+            let defaultAccount = account[0]
+            let detail = await contractDetail()
+            let result = await deploy(defaultAccount,detail)
+        }
+        
+        
+    </script>
+</body>
+</html>
